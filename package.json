@@ -1,9 +1,12 @@
 {
   "name": "dsh-console-plugin",
-  "version": "0.5.64",
-  "description": "DSH控制台面板：在 DSH 设置里显示扫码配对面板，手机扫一下就连上这台电脑的 DSH。",
+  "version": "0.5.65-guard.1",
+  "description": "（加固分支 dsh-console-guard，基于上游 0.5.64）DSH控制台面板：扫码/6位码配对鸿蒙 App；仅局域网、无云端/隧道/屏幕控制/手机端插件安装/手机端升级。",
   "license": "MIT",
   "author": "CJ <ChenJun25@users.noreply.github.com>",
+  "contributors": [
+    "dsh-console-guard hardening fork"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ChenJun25/dsh-console-plugin.git"
@@ -58,6 +61,7 @@
     "README.md"
   ],
   "scripts": {
-    "test": "node test/selftest.mjs"
+    "test": "node test/guard/run.mjs",
+    "test:legacy-upstream": "node test/selftest.mjs"
   }
 }

@@ -1,14 +1,21 @@
-# DSH Console - bundle patch
+# DSH Console Guard - bundle patch（加固分支）
 #
-# Install: add the packed .tgz through the DSH plugin page, or list this package in the bundle config.
+# 基于上游 dsh-console-plugin@0.5.64（MIT 声明）的本地加固版：
+#   - 只保留手机 App 核心协议（配对 / 会话 / 审批 / 附件 / 实时流）
+#   - 去掉云端外联、公网隧道、屏幕串流与远程输入、手机端插件安装/升级、
+#     伴生插件静默安装、任意路径读写、桌面 Web GUI 代理
+#   - 修复局域网未授权取配对码/票据（P0）、来源判定绕过、DNS rebinding、无限速猜码
 #
-# NOTE: the loader entry lives in THIS file, which ships inside the package.
-# Do not repeat the same insert in the host's own cordis.patch.yml -
-# that file is only for id-scoped config overrides; a duplicate insert loads the plugin twice.
+# 安装前先卸载上游 dsh-console-plugin（同包名、同 loader id，不能共存）。
 #
-# Config (usually not needed):
-#   port: 8899      LAN service port; falls back to the next free port when taken
-#   name: "My PC"   display name shown in the panel
+# 配置（一般不用动）：
+#   port: 8899                局域网服务端口
+#   name: "我的电脑"           面板显示名
+#   guard:
+#     fileRoots: []           允许手机浏览/下载的目录（收件箱始终允许）
+#     extraBaseUrls: []       额外基地址（如 Tailscale http://100.x.y.z:8899），进二维码 c=
+#     claimFailMax: 20        /claim 错码限速（次/窗口）
+#     pairAcceptMax: 30       /mp/pair/accept 限速（次/窗口）
 - insert:
     - id: dsh-console
       name: './lib/index.js'
