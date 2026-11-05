@@ -68,6 +68,7 @@
 4. 安装完成按提示重启/重载，打开 **设置 → 导航列表 → DSH控制台**（或侧栏底部入口）应能看到面板与 6 位码。
 
 > - 本地 tgz 安装不经过 registry，不受 pnpm「最小发布龄（minimumReleaseAge）」影响。
+> - 已构建好的包：`dsh-console-guard/dist/dsh-console-plugin-0.5.65-guard.1.tgz`（源码仓库内；包内 `files` 与上游一致）。
 > - 如果插件页报 `qrcode` 依赖装不上：本包依赖 `qrcode@^1.5.4`，需要 profile 能访问 npm registry；离线环境可先手工在该 profile 里 `pnpm add qrcode`（上游同样有此依赖）。
 > - 卸载：插件页移除 `dsh-console-plugin`，再删除 `~/.dsh/dsh-console-*.json`、`~/.dsh/dsh-console-inbox` 等本插件状态文件（可选）。
 
@@ -120,6 +121,9 @@
 - 收件箱位置：`~/.dsh/dsh-console-inbox`（Windows：`C:\Users\<你>\.dsh\dsh-console-inbox`）。
 - 端口被占用时本插件默认**报错退出**（上游行为，手机只认 8899）；先关掉占用 8899 的程序。
 
+> ⚠️ **`guard.enabled: false` 会恢复上游 0.5.64 的全部高危能力**（云端注册/心跳、公网隧道、屏幕串流与远程输入、手机端插件安装、手机端升级、推送、伴生插件安装），等于退回有 P0 的版本。
+> 该开关**只用于回归对照**，日常使用必须保持 `true`；启动日志会打印 `[guard] 宿主侧加固 enabled=…`，请确认是 `true`。
+
 ---
 
 ## 6. 与官方 App 的兼容性
@@ -149,6 +153,14 @@
 - `/mp/pair/accept` 用正确 6 位码换取设备 Cookie 时**不消耗**该码（上游行为）；码本身 15 分钟有效，之后失效。
 - 局域网 HTTP 明文；`token` 可能出现在 URL/日志中（上游设计）。
 - 访问码持久化在 `~/.dsh/dsh-console-token.json`（0600），重启不变；如需轮换可删除该文件后重启 DSH（会重新生成并让旧 token 失效）。
+- **CORS 残留（P3）**：局域网服务仍返回 `Access-Control-Allow-Origin: *`，且 token 保护的 API 不校验 Host/Origin。原 P0 取码链已断（未鉴权配对端点已 Host 白名单 + 关闭取码），该残留降为 P3；**不要把 8899 暴露到公网或反向代理**（本加固版也不支持隧道）。
+- **Windows 文件权限**：设备密钥/吊销名单/token 文件代码里按 `0600` 写入，但 Windows 上 Node 的 POSIX mode 不生效（实测为 `0666`，实际隔离取决于 NTFS ACL）。多用户共用电脑时可自行收紧：
+
+  ```powershell
+  icacls "$env:USERPROFILE\.dsh" /inheritance:r /grant:r "$env:USERNAME:(OI)(CI)F"
+  ```
+
+完整独立复核（159 PASS / 0 FAIL / 1 平台未覆盖，含 SEC-01..22 对照表、12 条残留风险、16 条真机清单）见 [analysis/guard/verification.md](../../analysis/guard/verification.md)。
 
 ---
 
@@ -159,6 +171,8 @@
 - **手机端权限收窄**：无插件安装/启停、无升级/回滚、无重启、无桌面 GUI 代理、无屏幕/输入、文件仅白名单目录、权限/预设不可改。
 - **本地文件**：设备密钥与吊销名单 0600；吊销后重新配对不自动解黑。
 - **零新增外联**：除你配置的 `extraBaseUrls` 与 DSH 自身流量外，加固版加载/运行不访问作者域名、npm registry、华为推送等外部服务（沙箱测试实测外部目标=0）。
+
+> **独立复核结论**：`analysis/guard/verification.md` —— 160 项断言 **159 PASS / 0 FAIL / 1 UNCOVERED（仅 Windows 文件权限平台限制）**；P0 攻击链在加固版整链失败、上游基线同一探针 200/200（对照成立）；路由白名单、限速、Host 校验、/cmd 危险 op、文件白名单、零外联均有独立证据。
 
 > **它不是“绝对安全”的**：攻击面仍包括「能看到电脑屏幕的人」、局域网明文嗅探、手机 App 自身（闭源，未审计）、DSH 宿主本身的权限模型。强烈建议 DSH 的默认权限预设不要设为 `danger-full-access`（否则拿到 token 的人可让 agent 直接执行命令）。
 

@@ -5,9 +5,9 @@
   "token": "a1b2c3d4e5f60718a1b2c3d4e5f60718a1b2c3d4e5f60718a1b2c3d4e5f60718",
   "port": 19600,
   "lanIp": "192.168.2.7",
-  "startedAt": "2026-11-05T12:47:00.706Z",
-  "finishedAt": "2026-11-05T12:47:03.617Z",
-  "durationMs": 2911,
+  "startedAt": "2026-11-05T12:59:53.531Z",
+  "finishedAt": "2026-11-05T12:59:55.383Z",
+  "durationMs": 1852,
   "summary": {
     "total": 22,
     "pass": 22,
@@ -21,11 +21,11 @@
       "group": "A",
       "title": "配对码来源（面板等价路径）→ code 6 位、payload 含 b=/k=pt_/i=/v=、qrDataUrl 可出图（加固版 lan.newCode()；上游 loopback GET /newcode）",
       "status": "PASS",
-      "ms": 10,
+      "ms": 6,
       "evidence": {
         "source": "lan.newCode()",
-        "code": "600812",
-        "payloadHead": "dsh-console://pair?b=http%3A%2F%2F192.168.2.7%3A19600%2Fdsh-console&k=pt_8529eb55895f09afcb8fb36c6bd5759e&n=guard-harnes",
+        "code": "057200",
+        "payloadHead": "dsh-console://pair?b=http%3A%2F%2F192.168.2.7%3A19600%2Fdsh-console&k=pt_911eb9e0205dee2da68ab74d3bd2d619&n=guard-harnes",
         "qrBytes": 30,
         "panelGuard": {
           "enabled": true
@@ -38,7 +38,7 @@
       "group": "A",
       "title": "扫码票据流：LAN POST /pair/ticket{k=…} → 200 {ok,token,base,name,c}；重复票据 403",
       "status": "PASS",
-      "ms": 66,
+      "ms": 40,
       "evidence": {
         "status": 200,
         "tokenLen": 64,
@@ -53,7 +53,7 @@
       "group": "A",
       "title": "6 位码流：面板等价取码（lan.newCode / 上游 HTTP）→ LAN POST /claim{code} → 200 {ok,token}",
       "status": "PASS",
-      "ms": 36,
+      "ms": 20,
       "evidence": {
         "source": "lan.newCode()",
         "status": 200,
@@ -67,10 +67,10 @@
       "group": "A",
       "title": "6 位码（新）：LAN POST /mp/pair/accept{token:code} → 200 + Set-Cookie: mp_device；错码 403",
       "status": "PASS",
-      "ms": 61,
+      "ms": 31,
       "evidence": {
         "status": 200,
-        "deviceId": "mp-ea1407b6",
+        "deviceId": "mp-cb84fa89",
         "hasSetCookie": true,
         "cookieLen": 58,
         "wrongStatus": 403
@@ -82,10 +82,10 @@
       "group": "A",
       "title": "扫码票据流续：LAN GET /mp-cookie?token=… → 200 {ok,cookie}，Cookie 可用于 /mp/api/session.list",
       "status": "PASS",
-      "ms": 25,
+      "ms": 13,
       "evidence": {
         "status": 200,
-        "cookieHead": "mp_device=8d5f35f3447691",
+        "cookieHead": "mp_device=10b63a2e498fdb",
         "rpcStatus": 200,
         "items": 2
       },
@@ -96,7 +96,7 @@
       "group": "A",
       "title": "设备通道：session.list 200；无 Cookie 401；session.history/session.prompt 成功；24 白名单 RPC 壳一致；/mp/pair/status 200",
       "status": "PASS",
-      "ms": 317,
+      "ms": 189,
       "evidence": {
         "noCookie": 401,
         "pairStatus": 200,
@@ -146,7 +146,7 @@
       "group": "A",
       "title": "旧版通道：/sessions /cmd{sessions} /cmd{fsList 收件箱} /attachment /upload /file(收件箱) 全 200",
       "status": "PASS",
-      "ms": 182,
+      "ms": 87,
       "evidence": {
         "sessions": 200,
         "cmdSessions": 200,
@@ -163,7 +163,7 @@
       "group": "A",
       "title": "/info?token= → 200，含 name/host/version/dshOk；错误 token 401",
       "status": "PASS",
-      "ms": 78,
+      "ms": 23,
       "evidence": {
         "status": 200,
         "name": "guard-harness-host",
@@ -178,7 +178,7 @@
       "group": "B",
       "title": "P0-1：/newcode、/qr 的 HTTP 端点必须对任何来源（含 loopback）403；上游 LAN+loopback 均 200 泄露码/票据",
       "status": "PASS",
-      "ms": 78,
+      "ms": 40,
       "evidence": {
         "attempts": [
           {
@@ -221,7 +221,7 @@
       "group": "B",
       "title": "DNS rebinding：loopback + Host: evil.example 访问 /newcode /qr /claim /pair/ticket /mp/pair/accept → 必须 403",
       "status": "PASS",
-      "ms": 52,
+      "ms": 35,
       "evidence": {
         "attempts": [
           {
@@ -257,7 +257,7 @@
       "group": "B",
       "title": "配对码爆破：LAN 连续错码 /claim 21 次必须出现 429（上游无 429）",
       "status": "PASS",
-      "ms": 365,
+      "ms": 249,
       "evidence": {
         "statuses": [
           403,
@@ -291,7 +291,7 @@
       "group": "B",
       "title": "/mp/pair/accept 爆破：LAN 连续错码 35 次必须至少一次 429（上游无 429）",
       "status": "PASS",
-      "ms": 716,
+      "ms": 389,
       "evidence": {
         "statuses": [
           403,
@@ -339,7 +339,7 @@
       "group": "B",
       "title": "无隧道模式：带 x-forwarded-for 的请求（/newcode /sessions /mp RPC /mp/pair/accept）→ 403",
       "status": "PASS",
-      "ms": 89,
+      "ms": 38,
       "evidence": {
         "attempts": [
           {
@@ -370,7 +370,7 @@
       "group": "B",
       "title": "路由白名单：/gui /screen/prepare /cloud/status /dsh-market /web /pet /plugins → 加固版 404（上游非 404）",
       "status": "PASS",
-      "ms": 9,
+      "ms": 5,
       "evidence": {
         "statuses": {
           "/gui": {
@@ -409,9 +409,9 @@
       "group": "B",
       "title": "文件越界：GET /file?path=<收件箱外文件> → 加固版 403（上游 200 读出内容）",
       "status": "PASS",
-      "ms": 17,
+      "ms": 10,
       "evidence": {
-        "path": "C:\\Users\\lzh\\AppData\\Local\\Temp\\dsh-guard-harness-HYEXK9\\outside\\outside-secret.txt",
+        "path": "C:\\Users\\lzh\\AppData\\Local\\Temp\\dsh-guard-harness-JUaH3H\\outside\\outside-secret.txt",
         "status": 403,
         "error": "guard: path not allowed",
         "leaked": false
@@ -422,13 +422,13 @@
       "group": "B",
       "title": "/cmd 危险 op：安装/升级/隧道/推送/桌面代理/权限预设 全部被拒；fsList/readFile 越界被拒；fsDrives 只回白名单根",
       "status": "PASS",
-      "ms": 322,
+      "ms": 254,
       "evidence": {
         "acceptedCount": 0,
         "fsListDenied": true,
         "readDenied": true,
         "drives": [
-          "C:\\Users\\lzh\\AppData\\Local\\Temp\\dsh-guard-harness-HYEXK9\\inbox"
+          "C:\\Users\\lzh\\AppData\\Local\\Temp\\dsh-guard-harness-JUaH3H\\inbox"
         ],
         "bareDrives": [],
         "sample": {
@@ -468,12 +468,12 @@
       "group": "B",
       "title": "吊销是硬边界：被吊销设备重新 /claim 不自动解黑（上游会 unrevoke）",
       "status": "PASS",
-      "ms": 29,
+      "ms": 35,
       "evidence": {
         "claimStatus": 200,
         "revokedBefore": true,
         "revokedAfter": true,
-        "deviceId": "mp-e5daf434"
+        "deviceId": "mp-88fbc000"
       }
     },
     {
@@ -481,7 +481,7 @@
       "group": "B",
       "title": "/mp RPC host.listDirectory 越界：白名单外目录 → forbidden（上游可浏览任意目录），白名单内 200",
       "status": "PASS",
-      "ms": 25,
+      "ms": 24,
       "evidence": {
         "inside": {
           "status": 200,
@@ -502,7 +502,7 @@
       "group": "B",
       "title": "/cmd 请求体上限（SEC-22）：加固版拒绝超大 body（保护宿主内存），上游照单全收",
       "status": "PASS",
-      "ms": 64,
+      "ms": 46,
       "evidence": {
         "status": 0,
         "clientError": "read ECONNRESET",

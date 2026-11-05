@@ -150,7 +150,7 @@ Select-String -Path lib\cloud-link.mjs,lib\dsh-console-cloud.mjs,lib\hw-push.mjs
 2. **只读桩字段**：`updateCheck/updateState/remotePairGet/customServerGet/pushStatus/pushTokenList` 采用「最小形状」，面板端已隐藏相关卡片；手机 App 若直接依赖这些字段渲染设置页，可能显示空/禁用（未在真机验证）。已尽量给 `items`+`tokens` 双字段降低风险。
 3. **`state.guard` 契约**：client.js 依赖 lan-server `panelData().guard`（Lead 已加）。若字段缺失/改名，面板会退回上游展示（不会崩，但不会隐藏入口）——集成时请保持 `{ enabled, version, features }`。
 4. **未收口的宿主能力（不在本任务红线清单，需 Lead/verifier 决策）**：
-   - `hmWeatherTool` 仍注册给宿主 tools（AI 调用时会访问 `api.open-meteo.com`；手机端 `pvWeather` op 已被 guard 拒绝，手机不能直接触发）；
+   - `hm_weather_card` 工具仍注册给宿主 tools，但 `execute` 返回**固定演示数据、无任何网络请求**（index.js:2194-2238；verifier 复核已确认）。真正会访问 `api.open-meteo.com` 的是 `pvWeather` op，已被 `/cmd` 策略 `guard-disabled` 拒绝；
    - `slashRun`、`create/fork/archive/delete`、`accessSet/masterSet`、`clientSlotDiagnostic` 仍允许已配对设备调用（会话核心操作；`accessSet` 只改开关，无隧道后无公网能力）；
    - `lib/*.mjs` 中的 screen/cloud/tunnel 等模块仍被 import（保持 diff 小），靠 lan-server 路由闸门 + 宿主侧不启动使其不可达；模块顶层无副作用（已 grep）。
 5. **`config.guard.enabled=false`** 仅用于与上游做回归对照，会恢复全部高危能力，生产环境禁止使用。
