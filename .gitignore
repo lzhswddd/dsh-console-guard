@@ -27,3 +27,4 @@ desktop.ini
 # ===== stray cache directory =====
 %SystemDrive%/node_modules
 *.tgz
+dist/

@@ -1,0 +1,558 @@
+{
+  "tool": "dsh-console-guard/test/guard/run.mjs",
+  "mode": "guard",
+  "libDir": "C:\\Users\\lzh\\Documents\\deepseek-harness\\default-workspace\\dsh-console-guard\\lib",
+  "token": "a1b2c3d4e5f60718a1b2c3d4e5f60718a1b2c3d4e5f60718a1b2c3d4e5f60718",
+  "port": 19600,
+  "lanIp": "192.168.2.7",
+  "startedAt": "2026-11-05T12:47:00.706Z",
+  "finishedAt": "2026-11-05T12:47:03.617Z",
+  "durationMs": 2911,
+  "summary": {
+    "total": 22,
+    "pass": 22,
+    "fail": 0,
+    "xfail": 0,
+    "skip": 0
+  },
+  "cases": [
+    {
+      "id": "A1",
+      "group": "A",
+      "title": "配对码来源（面板等价路径）→ code 6 位、payload 含 b=/k=pt_/i=/v=、qrDataUrl 可出图（加固版 lan.newCode()；上游 loopback GET /newcode）",
+      "status": "PASS",
+      "ms": 10,
+      "evidence": {
+        "source": "lan.newCode()",
+        "code": "600812",
+        "payloadHead": "dsh-console://pair?b=http%3A%2F%2F192.168.2.7%3A19600%2Fdsh-console&k=pt_8529eb55895f09afcb8fb36c6bd5759e&n=guard-harnes",
+        "qrBytes": 30,
+        "panelGuard": {
+          "enabled": true
+        }
+      },
+      "parityStatus": 200
+    },
+    {
+      "id": "A2",
+      "group": "A",
+      "title": "扫码票据流：LAN POST /pair/ticket{k=…} → 200 {ok,token,base,name,c}；重复票据 403",
+      "status": "PASS",
+      "ms": 66,
+      "evidence": {
+        "status": 200,
+        "tokenLen": 64,
+        "base": "http://192.168.2.7:19600/dsh-console",
+        "name": "guard-harness-host",
+        "replayStatus": 403
+      },
+      "parityStatus": 200
+    },
+    {
+      "id": "A3",
+      "group": "A",
+      "title": "6 位码流：面板等价取码（lan.newCode / 上游 HTTP）→ LAN POST /claim{code} → 200 {ok,token}",
+      "status": "PASS",
+      "ms": 36,
+      "evidence": {
+        "source": "lan.newCode()",
+        "status": 200,
+        "tokenLen": 64,
+        "base": "http://192.168.2.7:19600/dsh-console"
+      },
+      "parityStatus": 200
+    },
+    {
+      "id": "A4",
+      "group": "A",
+      "title": "6 位码（新）：LAN POST /mp/pair/accept{token:code} → 200 + Set-Cookie: mp_device；错码 403",
+      "status": "PASS",
+      "ms": 61,
+      "evidence": {
+        "status": 200,
+        "deviceId": "mp-ea1407b6",
+        "hasSetCookie": true,
+        "cookieLen": 58,
+        "wrongStatus": 403
+      },
+      "parityStatus": 200
+    },
+    {
+      "id": "A5",
+      "group": "A",
+      "title": "扫码票据流续：LAN GET /mp-cookie?token=… → 200 {ok,cookie}，Cookie 可用于 /mp/api/session.list",
+      "status": "PASS",
+      "ms": 25,
+      "evidence": {
+        "status": 200,
+        "cookieHead": "mp_device=8d5f35f3447691",
+        "rpcStatus": 200,
+        "items": 2
+      },
+      "parityStatus": 200
+    },
+    {
+      "id": "A6",
+      "group": "A",
+      "title": "设备通道：session.list 200；无 Cookie 401；session.history/session.prompt 成功；24 白名单 RPC 壳一致；/mp/pair/status 200",
+      "status": "PASS",
+      "ms": 317,
+      "evidence": {
+        "noCookie": 401,
+        "pairStatus": 200,
+        "pairStatusAnon": 401,
+        "methods": 17,
+        "statuses": {
+          "session.list": 200,
+          "session.history": 200,
+          "session.prompt": 200,
+          "workspace.list": 200,
+          "session.cancel": 200,
+          "session.models": 200,
+          "session.selectModel": 200,
+          "session.attachment": 200,
+          "command.list": 200,
+          "skill.list": 200,
+          "session.pins": 200,
+          "session.pin": 200,
+          "push.key": 200,
+          "push.subscribe": 200,
+          "mobile.pending": 200,
+          "quota.read": 200,
+          "session.create": 200
+        },
+        "unknownOk": false
+      },
+      "parityStatus": 200
+    },
+    {
+      "id": "A7",
+      "group": "A",
+      "title": "实时流：WS /mp/api/ws/mux 有 Cookie → 101；ping→pong；stub 触发 assistant/chunk → session/event 帧",
+      "status": "PASS",
+      "ms": 88,
+      "evidence": {
+        "anonStatus": 401,
+        "badCookieStatus": 401,
+        "wsStatus": 101,
+        "receivedReady": false,
+        "gotPong": true,
+        "gotSessionEvent": true
+      },
+      "parityStatus": 101
+    },
+    {
+      "id": "A8",
+      "group": "A",
+      "title": "旧版通道：/sessions /cmd{sessions} /cmd{fsList 收件箱} /attachment /upload /file(收件箱) 全 200",
+      "status": "PASS",
+      "ms": 182,
+      "evidence": {
+        "sessions": 200,
+        "cmdSessions": 200,
+        "cmdFsList": 200,
+        "attachment": 200,
+        "upload": 200,
+        "fileUploaded": 200,
+        "fileSeed": 200
+      },
+      "parityStatus": 200
+    },
+    {
+      "id": "A9",
+      "group": "A",
+      "title": "/info?token= → 200，含 name/host/version/dshOk；错误 token 401",
+      "status": "PASS",
+      "ms": 78,
+      "evidence": {
+        "status": 200,
+        "name": "guard-harness-host",
+        "host": "harness-host",
+        "version": "0.5.65-guard.1",
+        "badTokenStatus": 401
+      },
+      "parityStatus": 200
+    },
+    {
+      "id": "B1",
+      "group": "B",
+      "title": "P0-1：/newcode、/qr 的 HTTP 端点必须对任何来源（含 loopback）403；上游 LAN+loopback 均 200 泄露码/票据",
+      "status": "PASS",
+      "ms": 78,
+      "evidence": {
+        "attempts": [
+          {
+            "source": "lan",
+            "path": "/newcode",
+            "status": 403,
+            "error": "guard: 配对码/二维码不再通过局域网 HTTP 暴露，请在电脑端面板查看",
+            "leakedCode": false,
+            "leakedQr": false
+          },
+          {
+            "source": "lan",
+            "path": "/qr",
+            "status": 403,
+            "error": "guard: 配对码/二维码不再通过局域网 HTTP 暴露，请在电脑端面板查看",
+            "leakedCode": false,
+            "leakedQr": false
+          },
+          {
+            "source": "loop",
+            "path": "/newcode",
+            "status": 403,
+            "error": "guard: 配对码/二维码不再通过局域网 HTTP 暴露，请在电脑端面板查看",
+            "leakedCode": false,
+            "leakedQr": false
+          },
+          {
+            "source": "loop",
+            "path": "/qr",
+            "status": 403,
+            "error": "guard: 配对码/二维码不再通过局域网 HTTP 暴露，请在电脑端面板查看",
+            "leakedCode": false,
+            "leakedQr": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "B2",
+      "group": "B",
+      "title": "DNS rebinding：loopback + Host: evil.example 访问 /newcode /qr /claim /pair/ticket /mp/pair/accept → 必须 403",
+      "status": "PASS",
+      "ms": 52,
+      "evidence": {
+        "attempts": [
+          {
+            "path": "/newcode",
+            "status": 403,
+            "error": "guard: host not allowed"
+          },
+          {
+            "path": "/qr",
+            "status": 403,
+            "error": "guard: host not allowed"
+          },
+          {
+            "path": "/claim",
+            "status": 403,
+            "error": "guard: host not allowed"
+          },
+          {
+            "path": "/pair/ticket",
+            "status": 403,
+            "error": "guard: host not allowed"
+          },
+          {
+            "path": "/mp/pair/accept",
+            "status": 403,
+            "error": "guard: host not allowed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "B3",
+      "group": "B",
+      "title": "配对码爆破：LAN 连续错码 /claim 21 次必须出现 429（上游无 429）",
+      "status": "PASS",
+      "ms": 365,
+      "evidence": {
+        "statuses": [
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          429
+        ],
+        "any429": true,
+        "first429At": 21
+      }
+    },
+    {
+      "id": "B4",
+      "group": "B",
+      "title": "/mp/pair/accept 爆破：LAN 连续错码 35 次必须至少一次 429（上游无 429）",
+      "status": "PASS",
+      "ms": 716,
+      "evidence": {
+        "statuses": [
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          403,
+          429,
+          429,
+          429,
+          429,
+          429,
+          429,
+          429
+        ],
+        "any429": true,
+        "first429At": 29
+      }
+    },
+    {
+      "id": "B5",
+      "group": "B",
+      "title": "无隧道模式：带 x-forwarded-for 的请求（/newcode /sessions /mp RPC /mp/pair/accept）→ 403",
+      "status": "PASS",
+      "ms": 89,
+      "evidence": {
+        "attempts": [
+          {
+            "path": "/newcode",
+            "status": 403,
+            "error": "guard: 本加固版不支持公网/反向代理来源（无隧道）"
+          },
+          {
+            "path": "/sessions",
+            "status": 403,
+            "error": "guard: 本加固版不支持公网/反向代理来源（无隧道）"
+          },
+          {
+            "path": "/mp/api/session.list",
+            "status": 403,
+            "error": "guard: 本加固版不支持公网/反向代理来源（无隧道）"
+          },
+          {
+            "path": "/mp/pair/accept",
+            "status": 403,
+            "error": "guard: 本加固版不支持公网/反向代理来源（无隧道）"
+          }
+        ]
+      }
+    },
+    {
+      "id": "B6",
+      "group": "B",
+      "title": "路由白名单：/gui /screen/prepare /cloud/status /dsh-market /web /pet /plugins → 加固版 404（上游非 404）",
+      "status": "PASS",
+      "ms": 9,
+      "evidence": {
+        "statuses": {
+          "/gui": {
+            "status": 404,
+            "error": "guard: route disabled"
+          },
+          "/screen/prepare": {
+            "status": 404,
+            "error": "guard: route disabled"
+          },
+          "/cloud/status": {
+            "status": 404,
+            "error": "guard: route disabled"
+          },
+          "/dsh-market": {
+            "status": 404,
+            "error": "guard: route disabled"
+          },
+          "/web": {
+            "status": 404,
+            "error": "guard: route disabled"
+          },
+          "/pet": {
+            "status": 404,
+            "error": "guard: route disabled"
+          },
+          "/plugins": {
+            "status": 404,
+            "error": "guard: route disabled"
+          }
+        }
+      }
+    },
+    {
+      "id": "B7",
+      "group": "B",
+      "title": "文件越界：GET /file?path=<收件箱外文件> → 加固版 403（上游 200 读出内容）",
+      "status": "PASS",
+      "ms": 17,
+      "evidence": {
+        "path": "C:\\Users\\lzh\\AppData\\Local\\Temp\\dsh-guard-harness-HYEXK9\\outside\\outside-secret.txt",
+        "status": 403,
+        "error": "guard: path not allowed",
+        "leaked": false
+      }
+    },
+    {
+      "id": "B8",
+      "group": "B",
+      "title": "/cmd 危险 op：安装/升级/隧道/推送/桌面代理/权限预设 全部被拒；fsList/readFile 越界被拒；fsDrives 只回白名单根",
+      "status": "PASS",
+      "ms": 322,
+      "evidence": {
+        "acceptedCount": 0,
+        "fsListDenied": true,
+        "readDenied": true,
+        "drives": [
+          "C:\\Users\\lzh\\AppData\\Local\\Temp\\dsh-guard-harness-HYEXK9\\inbox"
+        ],
+        "bareDrives": [],
+        "sample": {
+          "pluginBundleInstall": {
+            "status": 200,
+            "result": {
+              "ok": false,
+              "error": "guard-disabled: pluginBundleInstall"
+            }
+          },
+          "updateStart": {
+            "status": 200,
+            "result": {
+              "ok": false,
+              "error": "guard-disabled: updateStart"
+            }
+          },
+          "fsList": {
+            "status": 200,
+            "result": {
+              "ok": false,
+              "error": "guard: path not allowed"
+            }
+          },
+          "readFile": {
+            "status": 200,
+            "result": {
+              "ok": false,
+              "error": "guard: path not allowed"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "B9",
+      "group": "B",
+      "title": "吊销是硬边界：被吊销设备重新 /claim 不自动解黑（上游会 unrevoke）",
+      "status": "PASS",
+      "ms": 29,
+      "evidence": {
+        "claimStatus": 200,
+        "revokedBefore": true,
+        "revokedAfter": true,
+        "deviceId": "mp-e5daf434"
+      }
+    },
+    {
+      "id": "B10",
+      "group": "B",
+      "title": "/mp RPC host.listDirectory 越界：白名单外目录 → forbidden（上游可浏览任意目录），白名单内 200",
+      "status": "PASS",
+      "ms": 25,
+      "evidence": {
+        "inside": {
+          "status": 200,
+          "ok": true
+        },
+        "outside": {
+          "status": 200,
+          "ok": false,
+          "error": {
+            "code": "forbidden",
+            "message": "guard: path not allowed"
+          }
+        }
+      }
+    },
+    {
+      "id": "B11",
+      "group": "B",
+      "title": "/cmd 请求体上限（SEC-22）：加固版拒绝超大 body（保护宿主内存），上游照单全收",
+      "status": "PASS",
+      "ms": 64,
+      "evidence": {
+        "status": 0,
+        "clientError": "read ECONNRESET",
+        "bodyMB": 13
+      }
+    },
+    {
+      "id": "C1",
+      "group": "C",
+      "title": "运行期无外部网络/外联：无 gaoshou25.cn / registry.npmjs.org / huawei；无 frpc/ffmpeg/curl spawn",
+      "status": "PASS",
+      "ms": 0,
+      "evidence": {
+        "observedHosts": {
+          "192.168.2.7": 127,
+          "127.0.0.1": 16
+        },
+        "httpCalls": 143,
+        "httpsCalls": 0,
+        "fetchCalls": 0,
+        "spawnCalls": [],
+        "external": []
+      }
+    },
+    {
+      "id": "A-parity",
+      "group": "A",
+      "title": "A 组响应状态与上游基线一致",
+      "status": "PASS",
+      "ms": 0,
+      "evidence": {
+        "compared": 9
+      }
+    }
+  ],
+  "parity": {
+    "baselineFile": "C:\\Users\\lzh\\Documents\\deepseek-harness\\default-workspace\\dsh-console-guard\\test\\guard\\baseline-upstream.json",
+    "compared": 9,
+    "result": "PASS"
+  },
+  "net": {
+    "observedHosts": {
+      "192.168.2.7": 127,
+      "127.0.0.1": 16
+    },
+    "httpCalls": 143,
+    "httpsCalls": 0,
+    "fetchCalls": 0,
+    "spawnCalls": [],
+    "external": []
+  },
+  "note": "加固版验收：B 组 PASS = 攻击被拒；A 组 PASS = 与上游协议兼容。"
+}

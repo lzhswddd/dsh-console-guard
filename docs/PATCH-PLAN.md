@@ -31,7 +31,7 @@
 | 设备通道 | Cookie `mp_device` → `POST /mp/api/<method> {rpcId,payload}` → `{type:'server-response',rpcId,result:{ok,value/error}}` | 24 个白名单方法名与返回壳不变 |
 | 实时流 | `WS /mp/api/ws/mux` 或 `/mp/api/ws/host`（Cookie 鉴权） | `{type:'ready',clientId}`、`pong`、`session/event`、审批/提问帧不变 |
 | 旧版通道 | `GET /sessions?token=`、`POST /cmd {op,payload}`、`GET /attachment`、`GET /file?path=`、`POST /upload`、`GET /info` | 保留；`/cmd` 的危险 op 见 §四 |
-| 面板（电脑端） | `GET /api/dsh-console/state`、`POST /api/dsh-console/newcode`（DSH 宿主认证层） | 保留，字段只增不减（新增 `guard`） |
+| 面板（电脑端） | `GET /api/dsh-console/state`、`POST /api/dsh-console/newcode`（DSH 宿主认证层）；换码由宿主路由直接调用 `lan.newCode()`，不再经局域网 HTTP | 保留，字段只增不减（新增 `guard`）；局域网 `/newcode`、`/qr` 对**任何来源**（含 loopback）一律 403 |
 
 ---
 
@@ -48,7 +48,7 @@
 2. 在 `const p = …`（约 1531 行，短号校验之后、`/gui` 分支之前）插入**总闸门**：
    - `guard.enabled && !routeAllowed(p)` → `404 {ok:false,error:'guard: route disabled'}`（`/gui*`、`/screen*`、`/cloud/*`、`/web`、`/pet`、`HOST_ROOT_PATHS` 全部被挡）；
    - `guard.enabled && isPairingPath(p)` → `hostAllowed(req.headers.host, {lanAddresses: lanAddresses(), extraBaseUrls: guard.extraBaseUrls})` 不通过 → `403 {ok:false,error:'guard: host not allowed'}`（防 DNS rebinding）；
-   - `guard.enabled && isLoopbackOnlyPath(p) && !(isLoopbackPeer(req) && forwardedFor(req)==='')` → `403`（`/qr`、`/newcode` 仅本机）；
+   - `guard.enabled && isLoopbackOnlyPath(p)`（`/qr`、`/newcode`）→ **任何来源都 403**（含 loopback：面板改走宿主认证路由 `lan.newCode()`，本机浏览器恶意页面也读不到码/票据）；
    - `guard.enabled && isRemoteLink(req)` → `403 {error:'guard: remote sources are not supported'}`（加固版无隧道/反代；顺带关闭 SEC-02）。
 3. `/claim`：错码计数**对所有来源**生效（把 `const remoteClaim = isRemoteLink(req)` 改为恒真语义），用 `guard.claimFailMax/claimFailWindowMs`；正确码路径必须仍然成功；成功重置计数（保持上游逻辑）。
 4. `/mp/pair/accept`：分支调用前用 `RateLimiter({max: guard.pairAcceptMax, windowMs: guard.pairAcceptWindowMs})` 按 `clientKeyOf(req)` 限速，超限 `429 {ok:false,error:'too-many'}`。其余 `/mp/*` 不额外限速。
@@ -140,19 +140,19 @@
 **必须覆盖的用例（全部要自动化，输出 PASS/FAIL + JSON 摘要）**：
 
 A. 兼容性（加固版与上游 **响应形状一致**）：
-1. loopback `GET /newcode` → 200，含 `code`(6位)、`payload` 含 `b=`、`k=pt_`、`i=dsh-console`；
+1. 面板 `/newcode` 等价路径：直接调 `lan.newCode()` → 返回 `code`(6位)、`payload` 含 `b=`、`k=pt_`、`i=dsh-console`、`qrDataUrl`（HTTP `/newcode`、`/qr` 在加固版任何来源都 403，属预期）；
 2. `POST /pair/ticket {ticket}` → 200 `{ok:true,token}`；重复票据 → 403；
 3. `POST /claim {code}`（从局域网 IP 发起）→ 200 `{ok:true,token}`；正确码仍能配对（关键！）；
 4. `POST /mp/pair/accept {token:code}`（局域网）→ 200 + `Set-Cookie: mp_device`；错码 403；
 5. 用 `mp_device` Cookie：`POST /mp/api/session.list` → `{type:'server-response',result.ok:true}`；无 Cookie 401；
 6. `session.history`/`session.prompt`（成功路径）→ result.ok:true；
-7. WS `/mp/api/ws/mux`（带 Cookie）→ 收到 `{type:'ready'}`；stub 触发 `assistant/chunk` 事件 → 收到 `session/event` 帧；
+7. WS `/mp/api/ws/mux`（带 Cookie）→ 101；stub 触发 `assistant/chunk` 事件 → 收到 `session/event` 帧；客户端 ping → pong（上游无 ready 帧，readyFrame 是死代码）；
 8. 旧通道：`GET /sessions?token=`、`POST /cmd {op:'sessions'}`、`GET /attachment`、`POST /upload`、`GET /file?path=<收件箱内文件>` 全部 200；
 9. `/info?token=` 200，字段满足上游形状（name/host/version/dshOk）。
 
 B. 安全回归（加固版必须拒绝，上游应复现 200 作为对照）：
-1. 局域网来源 `GET /newcode` / `/qr` → 403（P0-1 核心）；
-2. loopback 但 `Host: evil.example` 访问 `/newcode`、`/qr`、`/claim`、`/pair/ticket`、`/mp/pair/accept` → 403（DNS rebinding）；
+1. `/newcode`、`/qr`：局域网来源 403 **且 loopback 来源也 403**（HTTP 端点已关闭）；
+2. loopback 但 `Host: evil.example` 访问 `/claim`、`/pair/ticket`、`/mp/pair/accept` → 403（DNS rebinding）；
 3. 局域网来源连续错码 `/claim` 21 次 → 出现 429；正确码仍可在新窗口/未超限时配对；
 4. `/mp/pair/accept` 连续 31 次 → 至少一次 429；
 5. 局域网/loopback 请求带 `x-forwarded-for` → 403（无隧道模式）；
