@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChenJun25/dsh-console-plugin.git"
+    "url": "git+https://github.com/lzhswddd/dsh-console-guard.git"
   },
   "type": "module",
   "main": "lib/index.js",
@@ -63,5 +63,9 @@
   "scripts": {
     "test": "node test/guard/run.mjs",
     "test:legacy-upstream": "node test/selftest.mjs"
+  },
+  "homepage": "https://github.com/lzhswddd/dsh-console-guard#readme",
+  "bugs": {
+    "url": "https://github.com/lzhswddd/dsh-console-guard/issues"
   }
 }

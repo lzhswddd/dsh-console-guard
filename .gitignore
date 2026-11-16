@@ -27,4 +27,11 @@ desktop.ini
 # ===== stray cache directory =====
 %SystemDrive%/node_modules
 *.tgz
-dist/
+
+# 仓库内保留可安装包（供 GitHub 直接下载）
+
+
+
+# keep installable tgz for direct GitHub download
+dist/package/
+!dist/*.tgz
