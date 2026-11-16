@@ -20,11 +20,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Attribution note:
-This repository is a hardened source fork of ChenJun25/dsh-console-plugin
-(upstream version 0.5.64). The upstream repository does not ship a LICENSE
-file, but its package.json declares "license": "MIT"; the MIT terms above are
-reproduced on that basis, with upstream authorship retained.

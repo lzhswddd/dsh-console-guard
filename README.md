@@ -286,6 +286,7 @@ tar -czf dist/dsh-console-plugin-0.5.65-guard.1.tgz -C dist package
 
 ## 10. 许可、归属与免责
 
+- 许可：本仓库为 **MIT**（见 [`LICENSE`](LICENSE)）；上游归属说明见 [`NOTICE.md`](NOTICE.md)。
 - 上游项目：[ChenJun25/dsh-console-plugin](https://github.com/ChenJun25/dsh-console-plugin)（package.json 声明 MIT；上游仓库**没有 LICENSE 文件**，本分支按 package.json 的 MIT 声明保留原作者署名与仓库地址信息）。
 - 本加固分支：仅对上游源码做条件门控、路由白名单与安全策略增补（见 [`docs/PATCH-PLAN.md`](docs/PATCH-PLAN.md)、[`docs/host-hardening-notes.md`](docs/host-hardening-notes.md)、[`docs/verification.md`](docs/verification.md)），未重新发行到 npm。
 - 本仓库是**源 fork + 加固补丁**，不是上游官方版本；上游更新不会自动跟进。
